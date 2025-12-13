@@ -1,16 +1,22 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import * as THREE from 'three'
-import { useThreeScene } from '@/hooks'
+import { useThreeScene, useInteraction } from '@/hooks'
 
 interface NeuralCanvasProps {
   className?: string
+  onNeuronSelect?: (neuronId: string) => void
+  onNeuronComplete?: (neuronId: string) => void
 }
 
 /**
  * NeuralCanvas - The main WebGL canvas component
  * Renders the neural network visualization as a full-screen background
  */
-export function NeuralCanvas({ className = '' }: NeuralCanvasProps) {
+export function NeuralCanvas({
+  className = '',
+  onNeuronSelect,
+  onNeuronComplete,
+}: NeuralCanvasProps) {
   const { containerRef, sceneManager, isReady, metrics } = useThreeScene({
     sceneConfig: {
       backgroundColor: 0x0a0a1a,
@@ -20,6 +26,54 @@ export function NeuralCanvas({ className = '' }: NeuralCanvasProps) {
       fov: 60,
       position: { x: 0, y: 0, z: 50 },
       lookAt: { x: 0, y: 0, z: 0 },
+    },
+  })
+
+  // Track interactable objects
+  const [interactableObjects, setInteractableObjects] = useState<THREE.Object3D[]>([])
+
+  // Setup interaction system
+  useInteraction({
+    sceneManager,
+    interactableObjects,
+    interactionOptions: {
+      enableDrag: true,
+      enableHover: true,
+      enableContextMenu: true,
+    },
+    onSelect: (neuronId) => {
+      console.log('Neuron selected:', neuronId)
+      onNeuronSelect?.(neuronId)
+    },
+    onDoubleClick: (neuronId) => {
+      console.log('Neuron double-clicked (complete):', neuronId)
+      onNeuronComplete?.(neuronId)
+    },
+    onLongPress: (neuronId, position) => {
+      console.log('Long press on neuron:', neuronId, position)
+      // Could show context menu here
+    },
+    onDrag: (neuronId, position) => {
+      // Update neuron position during drag
+      const object = interactableObjects.find(obj => obj.userData.neuronId === neuronId)
+      if (object) {
+        object.position.copy(position)
+      }
+    },
+    onPinchZoom: (scale) => {
+      // Handle camera zoom
+      if (sceneManager) {
+        const camera = sceneManager.getCamera()
+        camera.position.z = Math.max(10, Math.min(100, camera.position.z / scale))
+      }
+    },
+    onTwoFingerPan: (deltaX, deltaY) => {
+      // Handle camera pan
+      if (sceneManager) {
+        const camera = sceneManager.getCamera()
+        camera.position.x -= deltaX * 0.05
+        camera.position.y += deltaY * 0.05
+      }
     },
   })
 
@@ -38,6 +92,7 @@ export function NeuralCanvas({ className = '' }: NeuralCanvasProps) {
     })
     const sphere = new THREE.Mesh(geometry, material)
     sphere.position.set(0, 0, 0)
+    sphere.userData.neuronId = 'neuron-center' // Add neuron ID for interaction
     scene.add(sphere)
 
     // Create a glow effect (outer sphere)
@@ -61,7 +116,7 @@ export function NeuralCanvas({ className = '' }: NeuralCanvasProps) {
       { x: -20, y: -3, z: -10 },
     ]
 
-    positions.forEach((pos) => {
+    positions.forEach((pos, index) => {
       const geo = new THREE.SphereGeometry(1.2, 24, 24)
       const mat = new THREE.MeshBasicMaterial({
         color: 0x06b6d4, // Cyan accent
@@ -70,6 +125,7 @@ export function NeuralCanvas({ className = '' }: NeuralCanvasProps) {
       })
       const s = new THREE.Mesh(geo, mat)
       s.position.set(pos.x, pos.y, pos.z)
+      s.userData.neuronId = `neuron-${index}` // Add neuron ID for interaction
       scene.add(s)
       additionalSpheres.push(s)
 
@@ -86,6 +142,9 @@ export function NeuralCanvas({ className = '' }: NeuralCanvasProps) {
       const line = new THREE.Line(lineGeometry, lineMaterial)
       scene.add(line)
     })
+
+    // Set interactable objects for the interaction system
+    setInteractableObjects([sphere, ...additionalSpheres])
 
     // Add subtle animation
     const unsubscribe = sceneManager.onUpdate((delta, elapsed) => {
