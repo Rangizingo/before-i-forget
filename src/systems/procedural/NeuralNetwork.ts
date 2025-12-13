@@ -325,7 +325,7 @@ export class NeuralNetwork {
         neurons[neuron.id] = {
           taskId: neuron.taskId,
           position: neuron.position,
-          clusterId: neuron.clusterId,
+          ...(neuron.clusterId !== undefined && { clusterId: neuron.clusterId }),
           connections: neuron.connections,
         }
       }

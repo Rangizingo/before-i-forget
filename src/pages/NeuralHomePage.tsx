@@ -4,6 +4,7 @@ import { NeuralTaskList } from '@/components/neural/NeuralTaskList'
 import { useNeuralNetwork } from '@/contexts/NeuralNetworkContext'
 import { useNeuralTasks } from '@/hooks/useNeuralTasks'
 import { useAuth } from '@/hooks/useAuth'
+import type { NeuronData, ConnectionData } from '@/types/neural'
 
 /**
  * NeuralHomePage - Main page combining neural visualization with task management
@@ -32,6 +33,21 @@ export function NeuralHomePage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [showMetrics, setShowMetrics] = useState(false)
   const [metrics, setMetrics] = useState<any>(null)
+  const [neurons, setNeurons] = useState<NeuronData[]>([])
+  const [connections, setConnections] = useState<ConnectionData[]>([])
+
+  // Update neurons and connections from network when tasks change
+  useEffect(() => {
+    if (!network) {
+      setNeurons([])
+      setConnections([])
+      return
+    }
+
+    // Update immediately when tasks change
+    setNeurons(network.getAllNeurons())
+    setConnections(network.getAllConnections())
+  }, [network, tasks]) // Re-run when tasks change to catch new neurons
 
   // Update metrics periodically
   useEffect(() => {
@@ -69,7 +85,19 @@ export function NeuralHomePage() {
     <div className="neural-home-page">
       {/* Neural Network Visualization Background */}
       <div className="neural-canvas-container">
-        <NeuralCanvas className="w-full h-full" />
+        <NeuralCanvas
+          className="w-full h-full"
+          neurons={neurons}
+          connections={connections}
+          onNeuronSelect={(id) => console.log('Selected neuron:', id)}
+          onNeuronComplete={(id) => {
+            // Find task associated with this neuron and toggle it
+            const taskId = Array.from(taskNeuronMap.entries()).find(
+              ([_tid, nid]) => nid === id
+            )
+            if (taskId) toggleComplete(taskId[0])
+          }}
+        />
       </div>
 
       {/* Top Bar */}

@@ -182,7 +182,7 @@ export class SoundManager {
       }
 
       this.initialized = true
-      console.log('SoundManager initialized successfully')
+      // SoundManager initialized
     } catch (error) {
       console.error('Failed to initialize SoundManager:', error)
       throw error

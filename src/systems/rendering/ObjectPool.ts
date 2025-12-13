@@ -318,7 +318,7 @@ export class MemoryManager {
     })
 
     if (keysToRemove.length > 0) {
-      console.log(`MemoryManager: cleaned up ${keysToRemove.length} unused resources`)
+      // Resources cleaned up
     }
   }
 

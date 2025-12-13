@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from '@/hooks'
 import { ProtectedRoute } from '@/components/layout'
-import { LoginPage, HomePage, MagicLinkVerifyPage, NeuralTestPage } from '@/pages'
+import { LoginPage, MagicLinkVerifyPage, NeuralTestPage, NeuralHomePage } from '@/pages'
+import { NeuralNetworkProvider } from '@/contexts/NeuralNetworkContext'
 
 export default function App() {
   return (
@@ -15,7 +16,9 @@ export default function App() {
             path="/"
             element={
               <ProtectedRoute>
-                <HomePage />
+                <NeuralNetworkProvider>
+                  <NeuralHomePage />
+                </NeuralNetworkProvider>
               </ProtectedRoute>
             }
           />
