@@ -1,3 +1,5 @@
 export { AuthProvider, useAuth } from './useAuth'
 export { useTasks } from './useTasks'
 export { useOnlineStatus } from './useOnlineStatus'
+export { useThreeScene } from './useThreeScene'
+export { useSound } from './useSound'

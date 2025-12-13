@@ -25,3 +25,6 @@ export function isOverdue(date: Date): boolean {
 export function classNames(...classes: (string | boolean | undefined)[]): string {
   return classes.filter(Boolean).join(' ')
 }
+
+// Export color theory utilities
+export * from './colorTheory'
