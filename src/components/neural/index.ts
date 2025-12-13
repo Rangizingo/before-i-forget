@@ -1,3 +1,8 @@
 export { NeuralCanvas } from './NeuralCanvas'
 export { SoundSettings } from './SoundSettings'
 export { NeuralTaskList } from './NeuralTaskList'
+export { LayerIndicator } from './LayerIndicator'
+export { EmptyState } from './EmptyState'
+export type { EmptyStateProps } from './EmptyState'
+export { WebGLFallback, isWebGLSupported, getWebGLErrorReason } from './WebGLFallback'
+export type { WebGLFallbackProps } from './WebGLFallback'
