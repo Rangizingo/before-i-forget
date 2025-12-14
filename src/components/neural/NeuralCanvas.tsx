@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import * as THREE from 'three'
 import { useThreeScene, useInteraction } from '@/hooks'
 import type { NeuronData, ConnectionData } from '@/types/neural'
@@ -33,14 +33,14 @@ export function NeuralCanvas({
     cameraConfig: { fov: 60, position: { x: 0, y: 0, z: 50 }, lookAt: { x: 0, y: 0, z: 0 } },
   })
 
-  const [interactableObjects, setInteractableObjects] = useState<THREE.Object3D[]>([])
+  const interactableObjectsRef = useRef<THREE.Object3D[]>([])
   const neuronMeshesRef = useRef<Map<string, { mesh: THREE.Mesh; glow: THREE.Mesh }>>(new Map())
   const connectionLinesRef = useRef<Map<string, THREE.Line>>(new Map())
   const animUnsubRef = useRef<(() => void) | null>(null)
 
-  useInteraction({
+  const { setInteractableObjects } = useInteraction({
     sceneManager,
-    interactableObjects,
+    interactableObjects: interactableObjectsRef.current,
     interactionOptions: { enableDrag: true, enableHover: true, enableContextMenu: true },
     onSelect: (id) => onNeuronSelect?.(id),
     onDoubleClick: (id) => onNeuronComplete?.(id),
@@ -119,7 +119,7 @@ export function NeuralCanvas({
       const ld = createConnLine(c, nMap, scene)
       if (ld) { connectionLinesRef.current.set(c.id, ld.line); lineList.push(ld) }
     })
-    setInteractableObjects(interacts)
+    interactableObjectsRef.current = interacts; setInteractableObjects(interacts)
     if (animUnsubRef.current) animUnsubRef.current()
     animUnsubRef.current = sceneManager.onUpdate((dt, elapsed) => {
       neuronMeshesRef.current.forEach((md, nid) => {

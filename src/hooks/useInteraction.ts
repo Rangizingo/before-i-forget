@@ -231,8 +231,13 @@ export function useInteraction(options: UseInteractionOptions): UseInteractionRe
     gestureHandlerRef.current = gestureHandler
 
     // Update gesture state
+    let lastGesturingState = false
     const checkGestureState = setInterval(() => {
-      setIsGesturing(gestureHandler.isActive())
+      const currentState = gestureHandler.isActive()
+      if (currentState !== lastGesturingState) {
+        lastGesturingState = currentState
+        setIsGesturing(currentState)
+      }
     }, 100)
 
     // Register update callback for animations

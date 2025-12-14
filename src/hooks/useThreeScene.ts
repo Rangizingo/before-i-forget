@@ -37,6 +37,7 @@ export function useThreeScene(options: UseThreeSceneOptions = {}): UseThreeScene
 
   const containerRef = useRef<HTMLDivElement>(null)
   const sceneManagerRef = useRef<SceneManager | null>(null)
+  const [sceneManager, setSceneManager] = useState<SceneManager | null>(null)
   const [isReady, setIsReady] = useState(false)
   const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null)
 
@@ -53,6 +54,7 @@ export function useThreeScene(options: UseThreeSceneOptions = {}): UseThreeScene
       sceneConfig
     )
     sceneManagerRef.current = manager
+    setSceneManager(manager)
     setIsReady(true)
 
     // Setup metrics tracking
@@ -72,6 +74,7 @@ export function useThreeScene(options: UseThreeSceneOptions = {}): UseThreeScene
       clearInterval(metricsInterval)
       manager.dispose()
       sceneManagerRef.current = null
+      setSceneManager(null)
       setIsReady(false)
     }
   }, []) // Only run once on mount
@@ -92,7 +95,7 @@ export function useThreeScene(options: UseThreeSceneOptions = {}): UseThreeScene
 
   return {
     containerRef: containerRef as React.RefObject<HTMLDivElement>,
-    sceneManager: sceneManagerRef.current,
+    sceneManager,
     isReady,
     metrics,
     start,
